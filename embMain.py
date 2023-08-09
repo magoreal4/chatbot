@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import csv
-from embOpenAI import MyEmbedding
+from chromaDBService import MyChromaDB
 
-my_embedding = MyEmbedding("serprolim_collection")
+my_chormaDB = MyChromaDB("collection")
 
 def cargar_archivo():
     archivo = filedialog.askopenfilename(filetypes=[("Archivos CSV", "*.csv")])
@@ -19,7 +19,7 @@ def cargar_archivo():
         except IOError as e:
             messagebox.showerror("Error", f"No se pudo cargar el archivo: {str(e)}")
 
-def mostrar_contenido(event):
+def mostrar_contenido():
     seleccionado = lista.curselection()
     if seleccionado:
         contenido = lista.get(seleccionado)
@@ -47,8 +47,8 @@ def borrar_elemento():
         lista.delete(index)
 
 def funcion_embedding():
-    seleccionados = lista.get(0, tk.END)
-    my_embedding.create_db(seleccionados)
+    seleccionados = list(lista.get(0, tk.END))
+    my_chormaDB.create_db(seleccionados,my_chormaDB.collection_name)
     messagebox.showinfo("Información", "Embedding finalizado con éxito")
 
 
@@ -129,14 +129,40 @@ def create_right_frame():
 
     return marco_texto_seleccionado, entrada_nuevo_elemento
 
+
+def actualizar_collection():
+    global my_chormaDB
+    valor = entrada_serprolim_collection.get()
+    my_chormaDB = MyChromaDB(valor)
+    messagebox.showinfo("Información", f"collection actualizado a: {valor}")
+
+# Función para crear el cuadro de texto y el botón en la parte superior
+def create_top_frame():
+    marco_superior = tk.Frame(ventana)
+    marco_superior.pack(pady=10, padx=10, fill=tk.X, expand=True)
+
+    label_serprolim = tk.Label(marco_superior, text="Collection name:")
+    label_serprolim.pack(side=tk.LEFT)
+
+    entrada_serprolim = tk.Entry(marco_superior, width=30)
+    entrada_serprolim.pack(side=tk.LEFT, padx=5)
+    entrada_serprolim.insert(0, "collection")  # Valor por defecto
+
+    btn_actualizar_serprolim = tk.Button(marco_superior, text="Actualizar", command=actualizar_collection)
+    btn_actualizar_serprolim.pack(side=tk.LEFT)
+
+    return entrada_serprolim
+
 ventana = tk.Tk()
 ventana.title("Embeddings CSV")
-ventana.geometry("600x600")
+ventana.geometry("600x650")
 ventana.iconbitmap("logoIP40.ico")
 
-
-
 create_menu()
+
+# Crear el cuadro de texto y el botón en la parte superior
+entrada_serprolim_collection = create_top_frame()
+
 lista = create_left_frame()
 
 marco_texto_seleccionado, entrada_nuevo_elemento = create_right_frame()
