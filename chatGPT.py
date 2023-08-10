@@ -22,7 +22,7 @@ class VectorDBConfig:
     def __init__(self):
         persist_directory = "dbChroma"
         vectordb = Chroma(
-            collection_name="serprolim_collection",
+            collection_name="collection",
             embedding_function=OpenAIEmbeddings(),
             persist_directory=persist_directory
         )
@@ -110,7 +110,7 @@ class AgentConfig:
         )
         self.agent.agent.llm_chain.prompt = new_prompt
         
-        print(self.agent.agent.llm_chain.prompt)
+        # print(self.agent.agent.llm_chain.prompt)
 
 # agent.agent.llm_chain.prompt.messages[0].prompt.template="Responde en Español"
 

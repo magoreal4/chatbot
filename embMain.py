@@ -3,7 +3,7 @@ from tkinter import filedialog, messagebox
 import csv
 from chromaDBService import MyChromaDB
 
-my_chormaDB = MyChromaDB("collection")
+my_chormaDB = MyChromaDB()
 
 def cargar_archivo():
     archivo = filedialog.askopenfilename(filetypes=[("Archivos CSV", "*.csv")])
@@ -48,7 +48,8 @@ def borrar_elemento():
 
 def funcion_embedding():
     seleccionados = list(lista.get(0, tk.END))
-    my_chormaDB.create_db(seleccionados,my_chormaDB.collection_name)
+    collection = entrada_collection.get()
+    my_chormaDB.create_db(seleccionados,collection)
     messagebox.showinfo("Información", "Embedding finalizado con éxito")
 
 
@@ -129,29 +130,30 @@ def create_right_frame():
 
     return marco_texto_seleccionado, entrada_nuevo_elemento
 
-
-def actualizar_collection():
-    global my_chormaDB
-    valor = entrada_serprolim_collection.get()
-    my_chormaDB = MyChromaDB(valor)
-    messagebox.showinfo("Información", f"collection actualizado a: {valor}")
-
-# Función para crear el cuadro de texto y el botón en la parte superior
 def create_top_frame():
     marco_superior = tk.Frame(ventana)
     marco_superior.pack(pady=10, padx=10, fill=tk.X, expand=True)
 
-    label_serprolim = tk.Label(marco_superior, text="Collection name:")
-    label_serprolim.pack(side=tk.LEFT)
+    label_collection = tk.Label(marco_superior, text="Collection name:")
+    label_collection.pack(side=tk.LEFT)
 
-    entrada_serprolim = tk.Entry(marco_superior, width=30)
-    entrada_serprolim.pack(side=tk.LEFT, padx=5)
-    entrada_serprolim.insert(0, "collection")  # Valor por defecto
+    entrada_collection = tk.Entry(marco_superior, width=30)
+    entrada_collection.pack(side=tk.LEFT, padx=5)
+    entrada_collection.insert(0, "collection")  # Valor por defecto
 
-    btn_actualizar_serprolim = tk.Button(marco_superior, text="Actualizar", command=actualizar_collection)
-    btn_actualizar_serprolim.pack(side=tk.LEFT)
+    # btn_actualizar_serprolim = tk.Button(marco_superior, text="Actualizar", command=actualizar_collection)
+    # btn_actualizar_serprolim.pack(side=tk.LEFT)
 
-    return entrada_serprolim
+    return entrada_collection
+
+def actualizar_collection():
+    global my_chormaDB
+    valor = entrada_collection.get()
+    my_chormaDB = MyChromaDB(valor)
+    messagebox.showinfo("Información", f"collection actualizado a: {valor}")
+
+# Función para crear el cuadro de texto y el botón en la parte superior
+
 
 ventana = tk.Tk()
 ventana.title("Embeddings CSV")
@@ -161,7 +163,7 @@ ventana.iconbitmap("logoIP40.ico")
 create_menu()
 
 # Crear el cuadro de texto y el botón en la parte superior
-entrada_serprolim_collection = create_top_frame()
+entrada_collection = create_top_frame()
 
 lista = create_left_frame()
 

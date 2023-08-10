@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import Listbox, Text, Button, Frame, messagebox  
-import chromadb
-from chromadb.config import Settings
+# import chromadb
+# from chromadb.config import Settings
 from chromaDBService import MyChromaDB
 from embOpenAIService import MyEmbedding
 
@@ -10,8 +10,6 @@ class EmbeddingEditor:
         self.root = root
         self.my_embedding = MyEmbedding()
         self.chroma_db = MyChromaDB()
-        self.client = chromadb.Client(Settings(chroma_db_impl="duckdb+parquet", persist_directory="./dbChroma"))
-        self.all_collections = [collection.name for collection in self.client.list_collections()]
         self.documents = []
         self.setup_ui()
 
@@ -41,7 +39,9 @@ class EmbeddingEditor:
         self.collections_listbox = Listbox(collections_frame)
         self.collections_listbox.pack(fill=tk.BOTH, expand=True)
 
-        for collection_name in self.all_collections:
+        all_collections = self.chroma_db.list_collections()
+        
+        for collection_name in all_collections:
             self.collections_listbox.insert(tk.END, collection_name)
 
         update_button = Button(collections_frame, text="Actualizar", command=self.load_collection)
@@ -57,8 +57,7 @@ class EmbeddingEditor:
         confirm = messagebox.askyesno("Confirmación", f"¿Estás seguro de que deseas eliminar la colección '{selected_collection}'?")
         
         if confirm:
-            self.client.delete_collection(selected_collection)
-            
+            self.chroma_db.client.delete_collection(selected_collection)
             # Actualizar la lista de colecciones y borra contenidos
             self.update_collections_list()
             self.listbox.delete(0, tk.END)
@@ -66,9 +65,10 @@ class EmbeddingEditor:
             self.text_widget.delete(1.0, tk.END)
         
     def update_collections_list(self):
-        self.all_collections = [collection.name for collection in self.client.list_collections()]
         self.collections_listbox.delete(0, tk.END)
-        for collection_name in self.all_collections:
+        
+        all_collections = self.chroma_db.list_collections()
+        for collection_name in all_collections:
             self.collections_listbox.insert(tk.END, collection_name)
 
     def setup_content_ui(self):
@@ -89,11 +89,10 @@ class EmbeddingEditor:
     def load_collection(self):
         self.listbox.delete(0, tk.END)
         selected_collection = self.collections_listbox.get(self.collections_listbox.curselection())
-        self.collection = self.client.get_collection(name=selected_collection, embedding_function=self.my_embedding)
+        self.collection = self.chroma_db.client.get_collection(name=selected_collection, embedding_function=self.my_embedding)
         self.ids = self.collection.get()['ids']
         for id in self.ids:
             self.listbox.insert(tk.END, id)
-        
         self.documents = self.collection.get()['documents']
 
     def show_document(self, event=None):
